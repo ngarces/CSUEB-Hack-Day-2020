@@ -1,0 +1,31 @@
+Feasability, Requirements, Specifications, Implementation, Delivery
+
+Pathogens- agent (usually microorganism) causing and infection
+Viruses - acellilar (do not have cell)
+Bacteria - unicallular
+Parasites - uni or multicellular
+
+Scenario
+State of emergency declared to a communicable disease outbreak
+People are contagious before symptoms are present
+Begins with fever
+Cough
+One compication is pneumonia, sometimes leading to death
+
+Medical tent
+Cots - bed
+Blankets, pillows
+Variety of personal protective equipment
+Medication - IV fluids
+
+Robotic arm responds to or contains outbreak
+
+Primary - measures that precent onset of illness before disease process begins
+Secondary - measures that lead to early diagnosis and prompt treatment to precent a more serious problem from developing
+Tertiary - measures that soften impact of illness
+
+Local healthcare sustem is alreadu overwhelmed
+Outdated health system
+Not enough healthcare providers
+Lack of trust in healthcare system
+
