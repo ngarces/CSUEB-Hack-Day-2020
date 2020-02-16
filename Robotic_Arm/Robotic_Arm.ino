@@ -14,7 +14,7 @@ static const int DHT_SENSOR_PIN = 13;
 DHT_nonblocking dht_sensor( DHT_SENSOR_PIN, DHT_SENSOR_TYPE );
 
 
-
+//IR Remote
 IRrecv irrecv(receiver);     // create instance of 'irrecv'
 decode_results results;      // create instance of 'decode_results'
 
@@ -28,7 +28,16 @@ int  Led13 = 13;              // Define LED port; this is the LED built in to th
                               // When D0 from the Sound Sensor (connnected to pin 7 on the
                               // Arduino) sends High (voltage present), L will light. In practice, you
                               // should see LED13 on the Arduino blink when LED2 on the Sensor is 100% lit.
-                              
+
+
+int latch=6;  //74HC595  pin 9 STCP
+int clock=7; //74HC595  pin 10 SHCP
+int data=5;   //74HC595  pin 8 DS
+
+unsigned char table[]=
+{0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x77,0x7c
+,0x39,0x5e,0x79,0x71,0x00};
+
 // describing Remote IR codes 
 void translateIR() // takes action based on IR code received
 {
@@ -48,15 +57,15 @@ void translateIR() // takes action based on IR code received
   case 0xFF9867: Serial.println("EQ");    break;
   case 0xFFB04F: Serial.println("ST/REPT");    break;
   case 0xFF6897: Serial.println("0");    break;
-  case 0xFF30CF: Serial.println("1");    break;
-  case 0xFF18E7: Serial.println("2");    break;
-  case 0xFF7A85: Serial.println("3");    break;
-  case 0xFF10EF: Serial.println("4");    break;
-  case 0xFF38C7: Serial.println("5");    break;
-  case 0xFF5AA5: Serial.println("6");    break;
-  case 0xFF42BD: Serial.println("7");    break;
-  case 0xFF4AB5: Serial.println("8");    break;
-  case 0xFF52AD: Serial.println("9");    break;
+  case 0xFF30CF: Display(1);    break;
+  case 0xFF18E7: Display(2);    break;
+  case 0xFF7A85: Display(3);    break;
+  case 0xFF10EF: Display(4);    break;
+  case 0xFF38C7: Display(5);    break;
+  case 0xFF5AA5: Display(6);    break;
+  case 0xFF42BD: Display(7);    break;
+  case 0xFF4AB5: Display(8);    break;
+  case 0xFF52AD: Display(9);    break;
   case 0xFFFFFFFF: Serial.println(" REPEAT");break;  
 
   default: 
@@ -73,16 +82,27 @@ void setup()   /*----( SETUP: RUNS ONCE )----*/
 {
   Serial.begin(9600);
   Serial.println("IR Receiver Button Decode");
-
+  irrecv.enableIRIn(); // Start the receiver
+  
   pinMode(sensorDigitalPin, INPUT);   //Define pin 7 for digital input for sound
   pinMode(Led13,OUTPUT);              //Define LED13 for digital outpupt for sound
 
-  
-  irrecv.enableIRIn(); // Start the receiver
+  pinMode(latch,OUTPUT);
+  pinMode(clock,OUTPUT);
+  pinMode(data,OUTPUT);
+
   delay(1000);
 
 }/*--(end setup )---*/
 
+void Display(unsigned char num)
+{
+
+  digitalWrite(latch,LOW);
+  shiftOut(data,clock,MSBFIRST,table[num]);
+  digitalWrite(latch,HIGH);
+  
+}
 /*
  * Poll for a measurement, keeping the state machine alive.  Returns
  * true if a measurement is available.
@@ -126,7 +146,7 @@ void loop()   /*----( LOOP: RUNS CONSTANTLY )----*/
   Serial.print("Distance: ");
   Serial.print(a);
   Serial.println("cm");  
-/*
+
   //Sound sensor
   analogValue = analogRead(sensorAnalogPin); // Read the value of the analog interface A0 assigned to digitalValue 
   digitalValue=digitalRead(sensorDigitalPin); // Read the value of the digital interface 7 assigned to digitalValue 
@@ -148,5 +168,5 @@ void loop()   /*----( LOOP: RUNS CONSTANTLY )----*/
   {
     translateIR(); 
     irrecv.resume(); // receive the next value
-  }*/
+  }
 }/* --(end main loop )-- */
