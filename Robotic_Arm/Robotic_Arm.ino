@@ -1,11 +1,17 @@
 #include "IRremote.h"
 #include "SR04.h"
+#include <dht_nonblocking.h>
 #define TRIG_PIN 12
 #define ECHO_PIN 11
+#define DHT_SENSOR_TYPE DHT_TYPE_11
 
 int receiver = 8; // Signal Pin of IR receiver to Arduino Digital Pin 11
 SR04 sr04 = SR04(ECHO_PIN,TRIG_PIN);
 long a;
+
+//Temp + humidity
+static const int DHT_SENSOR_PIN = 13;
+DHT_nonblocking dht_sensor( DHT_SENSOR_PIN, DHT_SENSOR_TYPE );
 
 
 
@@ -62,6 +68,7 @@ void translateIR() // takes action based on IR code received
 
 
 } //END translateIR
+
 void setup()   /*----( SETUP: RUNS ONCE )----*/
 {
   Serial.begin(9600);
@@ -76,18 +83,54 @@ void setup()   /*----( SETUP: RUNS ONCE )----*/
 
 }/*--(end setup )---*/
 
+/*
+ * Poll for a measurement, keeping the state machine alive.  Returns
+ * true if a measurement is available.
+ */
+static bool measure_environment( float *temperature, float *humidity )
+{
+  static unsigned long measurement_timestamp = millis( );
+
+  /* Measure once every four seconds. */
+  if( millis( ) - measurement_timestamp > 3000ul )
+  {
+    if( dht_sensor.measure( temperature, humidity ) == true )
+    {
+      measurement_timestamp = millis( );
+      return( true );
+    }
+  }
+
+  return( false );
+}
 
 void loop()   /*----( LOOP: RUNS CONSTANTLY )----*/
 {
+  //Temp and humidity
+  float temperature;
+  float humidity;
+
+  /* Measure temperature and humidity.  If the functions returns
+  true, then a measurement is available. */
+  if( measure_environment( &temperature, &humidity ) == true )
+  {
+    Serial.print( "T = " );
+    Serial.print( temperature, 1 );
+    Serial.print( " deg. C, H = " );
+    Serial.print( humidity, 1 );
+    Serial.println( "%" );
+  }
+
   //Distance
   a=sr04.Distance();
+  Serial.print("Distance: ");
   Serial.print(a);
-  Serial.println("cm");
-  delay(100);
-
+  Serial.println("cm");  
+/*
   //Sound sensor
   analogValue = analogRead(sensorAnalogPin); // Read the value of the analog interface A0 assigned to digitalValue 
   digitalValue=digitalRead(sensorDigitalPin); // Read the value of the digital interface 7 assigned to digitalValue 
+  Serial.print("Sound volume: ");
   Serial.println(analogValue); // Send the analog value to the serial transmit interface
   
   if(digitalValue==HIGH)      // When the Sound Sensor sends signla, via voltage present, light LED13 (L)
@@ -105,7 +148,5 @@ void loop()   /*----( LOOP: RUNS CONSTANTLY )----*/
   {
     translateIR(); 
     irrecv.resume(); // receive the next value
-  }
-
-  delay(500);
+  }*/
 }/* --(end main loop )-- */
